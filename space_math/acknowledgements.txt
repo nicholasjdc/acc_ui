@@ -1,0 +1,2 @@
+https://gouravkajal.medium.com/convert-speech-voice-to-text-using-web-speech-api-in-javascript-ece9804d8deb
+Specifically used for Speech-to-Text Recognition

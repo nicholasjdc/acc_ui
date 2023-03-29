@@ -1,4 +1,17 @@
-//Code copied from https://gouravkajal.medium.com/convert-speech-voice-to-text-using-web-speech-api-in-javascript-ece9804d8deb
+//General structure and implementation from https://gouravkajal.medium.com/convert-speech-voice-to-text-using-web-speech-api-in-javascript-ece9804d8deb
+
+numbersToWords = {
+    '1': 'one',
+    '2': 'two',
+    '3': 'three',
+    '4': 'four',
+    '5': 'five',
+    '6': 'six',
+    '7': 'seven',
+    '8':'eight',
+    '9': 'nine'
+
+}
 if ("webkitSpeechRecognition" in window) {
     // Initialize webkitSpeechRecognition
     let speechRecognition = new webkitSpeechRecognition();
@@ -9,7 +22,7 @@ if ("webkitSpeechRecognition" in window) {
     // Set the properties for the Speech Recognition object
     speechRecognition.continuous = true;
     speechRecognition.interimResults = true;
-    speechRecognition.lang = document.querySelector("#select_dialect").value;
+    speechRecognition.lang = 'English';
 
     // Callback Function for the onStart Event
     speechRecognition.onstart = () => {
@@ -34,16 +47,37 @@ if ("webkitSpeechRecognition" in window) {
             // If the result item is Final, add it to Final Transcript, Else add it to Interim transcript
             if (event.results[i].isFinal) {
                 final_transcript += event.results[i][0].transcript;
+                console.log(final_transcript)
             } else {
                 interim_transcript += event.results[i][0].transcript;
+                answer = document.querySelector("#answer").innerHTML
+                if(interim_transcript.includes(answer)
+                    || interim_transcript.includes(numbersToWords[answer])){
+                    console.log('CORRECT')
+                    createNextQuestion()
+                }
+                console.log(interim_transcript.includes("two"))
+                console.log(interim_transcript)
             }
         }
 
         // Set the Final transcript and Interim transcript.
-        document.querySelector("#final").innerHTML = final_transcript;
-        document.querySelector("#interim").innerHTML = interim_transcript;
+     
     };
+    function createNextQuestion(){
+        speechSynthesis.cancel();
 
+        firstNum = Math.floor(Math.random() * 5);
+        secondNum = Math.floor(Math.random() * 5) +5;
+        nextQuestion = `Captain! We currently have ${firstNum} cannons. We need
+        ${secondNum} cannons to defeat the aliens. How many more 
+        cannons do we need?`
+        answer = secondNum-firstNum
+        document.querySelector("#question").innerHTML = nextQuestion
+        document.querySelector("#answer").innerHTML = '' + answer
+        speak()
+
+    }
     // Set the onClick property of the start button
     document.querySelector("#start").onclick = () => {
         // Start the Speech Recognition
@@ -54,6 +88,17 @@ if ("webkitSpeechRecognition" in window) {
         // Stop the Speech Recognition
         speechRecognition.stop();
     };
+    document.querySelector("#next").onclick = () => {
+       
+        // Stop the Speech Recognition
+        createNextQuestion()
+        console.log(document.querySelector("#answer").innerHTML)
+
+    };
+    async function speak(){
+        speechSynthesis.speak(new SpeechSynthesisUtterance(document.querySelector("#question").innerHTML))
+
+    }
 } else {
     console.log("Speech Recognition Not Available");
 }
