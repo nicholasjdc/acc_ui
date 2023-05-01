@@ -64,6 +64,10 @@ if ("webkitSpeechRecognition" in window) {
         // Set the Final transcript and Interim transcript.
      
     };
+    window.addEventListener("load", () => {
+        console.log("page is fully loaded");
+        speechRecognition.start()
+      });
     function createNextQuestion(){
         speechSynthesis.cancel();
 
