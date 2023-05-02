@@ -34,7 +34,6 @@ if ("webkitSpeechRecognition" in window) {
 
     // Callback Function for the onStart Event
    console.log('hello')
-    speak(document.querySelector("#question").innerHTML)
     speechRecognition.onresult = (event) => {
         // Create the interim transcript string locally because we don't want it to persist like final transcript
         let interim_transcript = "";
