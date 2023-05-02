@@ -12,6 +12,9 @@ numbersToWords = {
     '9': 'nine'
 
 }
+validInstructions = ['settings','change',
+'playback','rate','next', 'slower','faster', 'next', 'help',
+'barge', 'repeat']
 if ("webkitSpeechRecognition" in window) {
     // Initialize webkitSpeechRecognition
     let speechRecognition = new webkitSpeechRecognition();
@@ -25,19 +28,8 @@ if ("webkitSpeechRecognition" in window) {
     speechRecognition.lang = 'English';
 
     // Callback Function for the onStart Event
-    speechRecognition.onstart = () => {
-        // Show the Status Element
-        document.querySelector("#status").style.display = "block";
-    };
-    speechRecognition.onerror = () => {
-        // Hide the Status Element
-        document.querySelector("#status").style.display = "none";
-    };
-    speechRecognition.onend = () => {
-        // Hide the Status Element
-        document.querySelector("#status").style.display = "none";
-    };
-
+   console.log('hello')
+    
     speechRecognition.onresult = (event) => {
         // Create the interim transcript string locally because we don't want it to persist like final transcript
         let interim_transcript = "";
@@ -47,16 +39,37 @@ if ("webkitSpeechRecognition" in window) {
             // If the result item is Final, add it to Final Transcript, Else add it to Interim transcript
             if (event.results[i].isFinal) {
                 final_transcript += event.results[i][0].transcript;
+                for(let i =0; i <validInstructions.length; ++i){
+                    if(final_transcript.includes(validInstructions[i])){
+                        final_transcript = ""
+
+                        if(validInstructions[i] == 'faster'){
+                            currRate = parseInt(document.querySelector("#rate").innerHTML)
+                            currRate +=1
+                            document.querySelector("#rate").innerHTML = currRate
+                            console.log(currRate)
+                        }else if(validInstructions[i] == 'slower'){
+                            currRate = parseInt(document.querySelector("#rate").innerHTML)
+                            currRate -=1
+                            document.querySelector("#rate").innerHTML = currRate
+                            console.log(currRate)
+
+                        }else if(validInstructions[i] == 'next'){
+                            createNextQuestion()
+                        }else if(validInstructions[i] == 'repeat'){
+                            speak(document.querySelector("#question").innerHTML)
+                        }
+                    }
+                }
                 console.log(final_transcript)
             } else {
                 interim_transcript += event.results[i][0].transcript;
                 answer = document.querySelector("#answer").innerHTML
+                
                 if(interim_transcript.includes(answer)
                     || interim_transcript.includes(numbersToWords[answer])){
-                    console.log('CORRECT')
                     createNextQuestion()
                 }
-                console.log(interim_transcript.includes("two"))
                 console.log(interim_transcript)
             }
         }
@@ -68,9 +81,8 @@ if ("webkitSpeechRecognition" in window) {
         console.log("page is fully loaded");
         speechRecognition.start()
       });
+ 
     function createNextQuestion(){
-        speechSynthesis.cancel();
-
         firstNum = Math.floor(Math.random() * 5);
         secondNum = Math.floor(Math.random() * 5) +5;
         nextQuestion = `Captain! We currently have ${firstNum} cannons. We need
@@ -79,9 +91,10 @@ if ("webkitSpeechRecognition" in window) {
         answer = secondNum-firstNum
         document.querySelector("#question").innerHTML = nextQuestion
         document.querySelector("#answer").innerHTML = '' + answer
-        speak()
+        speak(document.querySelector("#question").innerHTML)
 
     }
+    /*
     // Set the onClick property of the start button
     document.querySelector("#start").onclick = () => {
         // Start the Speech Recognition
@@ -92,6 +105,7 @@ if ("webkitSpeechRecognition" in window) {
         // Stop the Speech Recognition
         speechRecognition.stop();
     };
+    */
     document.querySelector("#next").onclick = () => {
        
         // Stop the Speech Recognition
@@ -99,8 +113,11 @@ if ("webkitSpeechRecognition" in window) {
         console.log(document.querySelector("#answer").innerHTML)
 
     };
-    async function speak(){
-        speechSynthesis.speak(new SpeechSynthesisUtterance(document.querySelector("#question").innerHTML))
+    async function speak(prompt){
+        speechSynthesis.cancel()
+        question = new SpeechSynthesisUtterance(prompt)
+        question.rate = parseInt(document.querySelector("#rate").innerHTML)
+        speechSynthesis.speak(question)
 
     }
 } else {
